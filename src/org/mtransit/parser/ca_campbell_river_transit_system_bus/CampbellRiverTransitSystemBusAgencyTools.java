@@ -1,6 +1,7 @@
 package org.mtransit.parser.ca_campbell_river_transit_system_bus;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -142,13 +143,45 @@ public class CampbellRiverTransitSystemBusAgencyTools extends DefaultAgencyTools
 	private static HashMap<Long, RouteTripSpec> ALL_ROUTE_TRIPS2;
 	static {
 		HashMap<Long, RouteTripSpec> map2 = new HashMap<Long, RouteTripSpec>();
+		map2.put(1L, new RouteTripSpec(1L, //
+				0, MTrip.HEADSIGN_TYPE_STRING, "Campbellton", //
+				1, MTrip.HEADSIGN_TYPE_STRING, "Willow Pt") //
+				.addTripSort(0, //
+						Arrays.asList(new String[] { //
+						"112038", // Westbound Erickson at Reef Cres #WILLOW_POINT
+								"110804", // ++
+								"110856", // Westbound 16th Ave at Tamarac #CAMPBELLTON
+						})) //
+				.addTripSort(1, //
+						Arrays.asList(new String[] { //
+						"112076", // Eastbound 16th Ave at Tamarac St #CAMPBELLTON
+								"110760", // ++
+								"112038", // Westbound Erickson at Reef Cres #WILLOW_POINT
+						})) //
+				.compileBothTripSort());
+		map2.put(2L, new RouteTripSpec(2L, //
+				0, MTrip.HEADSIGN_TYPE_STRING, "Campbellton", //
+				1, MTrip.HEADSIGN_TYPE_STRING, "Willow Pt") //
+				.addTripSort(0, //
+						Arrays.asList(new String[] { //
+						"112038", // Westbound Erickson at Reef Cres #WILLOW_POINT
+								"110775", // ++
+								"110856", // Westbound 16th Ave at Tamarac #CAMPBELLTON
+						})) //
+				.addTripSort(1, //
+						Arrays.asList(new String[] { //
+						"112076", // Eastbound 16th Ave at Tamarac St #CAMPBELLTON
+								"110790", // ++
+								"112038", // Westbound Erickson at Reef Cres #WILLOW_POINT
+						})) //
+				.compileBothTripSort());
 		ALL_ROUTE_TRIPS2 = map2;
 	}
 
 	@Override
 	public int compareEarly(long routeId, List<MTripStop> list1, List<MTripStop> list2, MTripStop ts1, MTripStop ts2, GStop ts1GStop, GStop ts2GStop) {
 		if (ALL_ROUTE_TRIPS2.containsKey(routeId)) {
-			return ALL_ROUTE_TRIPS2.get(routeId).compare(routeId, list1, list2, ts1, ts2, ts1GStop, ts2GStop);
+			return ALL_ROUTE_TRIPS2.get(routeId).compare(routeId, list1, list2, ts1, ts2, ts1GStop, ts2GStop, this);
 		}
 		return super.compareEarly(routeId, list1, list2, ts1, ts2, ts1GStop, ts2GStop);
 	}
@@ -164,7 +197,7 @@ public class CampbellRiverTransitSystemBusAgencyTools extends DefaultAgencyTools
 	@Override
 	public Pair<Long[], Integer[]> splitTripStop(MRoute mRoute, GTrip gTrip, GTripStop gTripStop, ArrayList<MTrip> splitTrips, GSpec routeGTFS) {
 		if (ALL_ROUTE_TRIPS2.containsKey(mRoute.getId())) {
-			return SplitUtils.splitTripStop(mRoute, gTrip, gTripStop, routeGTFS, ALL_ROUTE_TRIPS2.get(mRoute.getId()));
+			return SplitUtils.splitTripStop(mRoute, gTrip, gTripStop, routeGTFS, ALL_ROUTE_TRIPS2.get(mRoute.getId()), this);
 		}
 		return super.splitTripStop(mRoute, gTrip, gTripStop, splitTrips, routeGTFS);
 	}
