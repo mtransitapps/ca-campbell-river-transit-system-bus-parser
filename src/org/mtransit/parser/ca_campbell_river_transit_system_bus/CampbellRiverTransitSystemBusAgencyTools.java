@@ -26,8 +26,8 @@ import org.mtransit.parser.mt.data.MRoute;
 import org.mtransit.parser.mt.data.MTrip;
 import org.mtransit.parser.mt.data.MTripStop;
 
-// https://bctransit.com/*/footer/open-data
-// https://www.bctransit.com/data/gtfs/internet/CampbellRiverGTFS_20180615.zip
+// https://www.bctransit.com/open-data
+// https://www.bctransit.com/data/gtfs/CampbellRiverGTFS_20180615.zip
 public class CampbellRiverTransitSystemBusAgencyTools extends DefaultAgencyTools {
 
 	public static void main(String[] args) {
@@ -243,7 +243,7 @@ public class CampbellRiverTransitSystemBusAgencyTools extends DefaultAgencyTools
 	private static final Pattern ENDS_WITH_LOCAL = Pattern.compile("( local.*$)", Pattern.CASE_INSENSITIVE);
 
 	private static final Pattern ENDS_WITH_VIA = Pattern.compile("( via .*$)", Pattern.CASE_INSENSITIVE);
-	private static final Pattern STARTS_WITH_TO = Pattern.compile("(^.* to )", Pattern.CASE_INSENSITIVE);
+	private static final Pattern STARTS_WITH_TO = Pattern.compile("(^(.* to|to) )", Pattern.CASE_INSENSITIVE);
 
 	private static final Pattern AND = Pattern.compile("( and )", Pattern.CASE_INSENSITIVE);
 	private static final String AND_REPLACEMENT = " & ";
