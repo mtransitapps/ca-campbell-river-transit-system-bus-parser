@@ -27,7 +27,7 @@ import org.mtransit.parser.mt.data.MTrip;
 import org.mtransit.parser.mt.data.MTripStop;
 
 // https://www.bctransit.com/open-data
-// https://www.bctransit.com/data/gtfs/CampbellRiverGTFS_20180615.zip
+// https://www.bctransit.com/data/gtfs/campbell-river.zip
 public class CampbellRiverTransitSystemBusAgencyTools extends DefaultAgencyTools {
 
 	public static void main(String[] args) {
