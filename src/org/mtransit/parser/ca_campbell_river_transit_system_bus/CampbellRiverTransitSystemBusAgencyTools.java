@@ -214,7 +214,9 @@ public class CampbellRiverTransitSystemBusAgencyTools extends DefaultAgencyTools
 		}
 		if (mRoute.getId() == 7L) {
 			if (gTrip.getDirectionId() == 0) {
-				if (StringUtils.isEmpty(gTrip.getTripHeadsign()) || "Petersen A.M. Loop".equalsIgnoreCase(gTrip.getTripHeadsign())) {
+				if (StringUtils.isEmpty(gTrip.getTripHeadsign()) //
+						|| "Petersen A.M. Loop".equalsIgnoreCase(gTrip.getTripHeadsign()) //
+						|| "Petersen AM Loop".equalsIgnoreCase(gTrip.getTripHeadsign())) {
 					mTrip.setHeadsignStringNotEmpty("AM", gTrip.getDirectionId());
 					return;
 				} else {
@@ -222,7 +224,9 @@ public class CampbellRiverTransitSystemBusAgencyTools extends DefaultAgencyTools
 					System.exit(-1);
 				}
 			} else if (gTrip.getDirectionId() == 1) {
-				if (StringUtils.isEmpty(gTrip.getTripHeadsign()) || "Petersen P.M. Loop".equalsIgnoreCase(gTrip.getTripHeadsign())) {
+				if (StringUtils.isEmpty(gTrip.getTripHeadsign()) //
+						|| "Petersen P.M. Loop".equalsIgnoreCase(gTrip.getTripHeadsign()) //
+						|| "Petersen PM Loop".equalsIgnoreCase(gTrip.getTripHeadsign())) {
 					mTrip.setHeadsignStringNotEmpty("PM", gTrip.getDirectionId());
 					return;
 				} else {
