@@ -153,15 +153,22 @@ public class CampbellRiverTransitSystemBusAgencyTools extends DefaultAgencyTools
 				1, MTrip.HEADSIGN_TYPE_STRING, "Willow Pt") //
 				.addTripSort(0, //
 						Arrays.asList(new String[] { //
-						"112038", // Westbound Erickson at Reef Cres #WILLOW_POINT
+						"112038", // Erickson at Reef Cres #WILLOW_POINT
 								"110804", // ++
-								"110856", // Westbound 16th Ave at Tamarac #CAMPBELLTON
+								"110856", // 16th Ave at Tamarac #CAMPBELLTON
 						})) //
 				.addTripSort(1, //
 						Arrays.asList(new String[] { //
-						"112076", // Eastbound 16th Ave at Tamarac St #CAMPBELLTON
+						"112076", // 16th Ave at Tamarac St #CAMPBELLTON
+								"112030", // ==
+								"112032", // !=
+								"112083", // !=
+								"112029", // ==
 								"110760", // ++
-								"112038", // Westbound Erickson at Reef Cres #WILLOW_POINT
+								"110762", // ==
+								"110993", // !=
+								"110763", // ==
+								"112038", // Erickson at Reef Cres #WILLOW_POINT
 						})) //
 				.compileBothTripSort());
 		map2.put(2L, new RouteTripSpec(2L, //
