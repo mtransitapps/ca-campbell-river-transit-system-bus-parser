@@ -5,28 +5,18 @@ import org.jetbrains.annotations.Nullable;
 import org.mtransit.parser.CleanUtils;
 import org.mtransit.parser.DefaultAgencyTools;
 import org.mtransit.parser.MTLog;
-import org.mtransit.parser.Pair;
-import org.mtransit.parser.SplitUtils;
-import org.mtransit.parser.SplitUtils.RouteTripSpec;
 import org.mtransit.parser.StringUtils;
 import org.mtransit.parser.Utils;
 import org.mtransit.parser.gtfs.data.GCalendar;
 import org.mtransit.parser.gtfs.data.GCalendarDate;
 import org.mtransit.parser.gtfs.data.GRoute;
 import org.mtransit.parser.gtfs.data.GSpec;
-import org.mtransit.parser.gtfs.data.GStop;
 import org.mtransit.parser.gtfs.data.GTrip;
-import org.mtransit.parser.gtfs.data.GTripStop;
 import org.mtransit.parser.mt.data.MAgency;
 import org.mtransit.parser.mt.data.MRoute;
 import org.mtransit.parser.mt.data.MTrip;
-import org.mtransit.parser.mt.data.MTripStop;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.regex.Pattern;
 
 import static org.mtransit.parser.StringUtils.EMPTY;
@@ -156,110 +146,29 @@ public class CampbellRiverTransitSystemBusAgencyTools extends DefaultAgencyTools
 		return super.getRouteColor(gRoute);
 	}
 
-	private static final HashMap<Long, RouteTripSpec> ALL_ROUTE_TRIPS2;
-
-	static {
-		HashMap<Long, RouteTripSpec> map2 = new HashMap<>();
-		//noinspection deprecation
-		map2.put(1L, new RouteTripSpec(1L, //
-				0, MTrip.HEADSIGN_TYPE_STRING, "Campbellton", //
-				1, MTrip.HEADSIGN_TYPE_STRING, "Willow Pt") //
-				.addTripSort(0, //
-						Arrays.asList(//
-								"112038", // Erickson at Reef Cres #WILLOW_POINT
-								"110804", // ++
-								"110856" // 16th Ave at Tamarac #CAMPBELLTON
-						)) //
-				.addTripSort(1, //
-						Arrays.asList(//
-								"112076", // 16th Ave at Tamarac St #CAMPBELLTON
-								"112030", // ==
-								"112032", // !=
-								"112083", // !=
-								"112029", // ==
-								"110760", // ++
-								"110762", // ==
-								"110993", // !=
-								"110763", // ==
-								"112038" // Erickson at Reef Cres #WILLOW_POINT
-						)) //
-				.compileBothTripSort());
-		//noinspection deprecation
-		map2.put(2L, new RouteTripSpec(2L, //
-				0, MTrip.HEADSIGN_TYPE_STRING, "Campbellton", //
-				1, MTrip.HEADSIGN_TYPE_STRING, "Willow Pt") //
-				.addTripSort(0, //
-						Arrays.asList(//
-								"112038", // Westbound Erickson at Reef Cres #WILLOW_POINT
-								"110775", // ++
-								"110856" // Westbound 16th Ave at Tamarac #CAMPBELLTON
-						)) //
-				.addTripSort(1, //
-						Arrays.asList(//
-								"112076", // Eastbound 16th Ave at Tamarac St #CAMPBELLTON
-								"110790", // ++
-								"112038" // Westbound Erickson at Reef Cres #WILLOW_POINT
-						)) //
-				.compileBothTripSort());
-		ALL_ROUTE_TRIPS2 = map2;
-	}
-
-	@Override
-	public int compareEarly(long routeId, @NotNull List<MTripStop> list1, @NotNull List<MTripStop> list2, @NotNull MTripStop ts1, @NotNull MTripStop ts2, @NotNull GStop ts1GStop, @NotNull GStop ts2GStop) {
-		if (ALL_ROUTE_TRIPS2.containsKey(routeId)) {
-			return ALL_ROUTE_TRIPS2.get(routeId).compare(routeId, list1, list2, ts1, ts2, ts1GStop, ts2GStop, this);
-		}
-		return super.compareEarly(routeId, list1, list2, ts1, ts2, ts1GStop, ts2GStop);
-	}
-
-	@NotNull
-	@Override
-	public ArrayList<MTrip> splitTrip(@NotNull MRoute mRoute, @Nullable GTrip gTrip, @NotNull GSpec gtfs) {
-		if (ALL_ROUTE_TRIPS2.containsKey(mRoute.getId())) {
-			return ALL_ROUTE_TRIPS2.get(mRoute.getId()).getAllTrips();
-		}
-		return super.splitTrip(mRoute, gTrip, gtfs);
-	}
-
-	@NotNull
-	@Override
-	public Pair<Long[], Integer[]> splitTripStop(@NotNull MRoute mRoute, @NotNull GTrip gTrip, @NotNull GTripStop gTripStop, @NotNull ArrayList<MTrip> splitTrips, @NotNull GSpec routeGTFS) {
-		if (ALL_ROUTE_TRIPS2.containsKey(mRoute.getId())) {
-			return SplitUtils.splitTripStop(mRoute, gTrip, gTripStop, routeGTFS, ALL_ROUTE_TRIPS2.get(mRoute.getId()), this);
-		}
-		return super.splitTripStop(mRoute, gTrip, gTripStop, splitTrips, routeGTFS);
-	}
-
 	@Override
 	public void setTripHeadsign(@NotNull MRoute mRoute, @NotNull MTrip mTrip, @NotNull GTrip gTrip, @NotNull GSpec gtfs) {
-		if (ALL_ROUTE_TRIPS2.containsKey(mRoute.getId())) {
-			return; // split
-		}
-		if (mRoute.getId() == 7L) {
-			if (gTrip.getDirectionIdOrDefault() == 0) {
-				if (StringUtils.isEmpty(gTrip.getTripHeadsign()) //
-						|| "Petersen A.M. Loop".equalsIgnoreCase(gTrip.getTripHeadsign()) //
-						|| "Petersen AM Loop".equalsIgnoreCase(gTrip.getTripHeadsign())) {
-					mTrip.setHeadsignStringNotEmpty("AM", gTrip.getDirectionIdOrDefault());
-					return;
-				} else {
-					throw new MTLog.Fatal("Unexpected route trip to set for %s!", gTrip);
-				}
-			} else if (gTrip.getDirectionIdOrDefault() == 1) {
-				if (StringUtils.isEmpty(gTrip.getTripHeadsign()) //
-						|| "Petersen P.M. Loop".equalsIgnoreCase(gTrip.getTripHeadsign()) //
-						|| "Petersen PM Loop".equalsIgnoreCase(gTrip.getTripHeadsign())) {
-					mTrip.setHeadsignStringNotEmpty("PM", gTrip.getDirectionIdOrDefault());
-					return;
-				} else {
-					throw new MTLog.Fatal("Unexpected route trip to set for %s!", gTrip);
-				}
-			}
-		}
 		mTrip.setHeadsignStringNotEmpty(
 				cleanTripHeadsign(gTrip.getTripHeadsignOrDefault()),
 				gTrip.getDirectionIdOrDefault()
 		);
+	}
+
+	@Override
+	public boolean directionFinderEnabled() {
+		return true;
+	}
+
+	private static final Pattern PARSE_AM_PM_ = Pattern.compile("(^(.*)( (AM|PM) )(.*)$)");
+	private static final String PARSE_AM_PM_KEEP_ONLY_REPLACEMENT = "$4";
+	private static final String PARSE_AM_PM_KEEP_OTHER_REPLACEMENT = "$2 $5";
+
+	@NotNull
+	@Override
+	public String cleanDirectionHeadsign(boolean fromStopName, @NotNull String directionHeadSign) {
+		directionHeadSign = PARSE_AM_PM_.matcher(directionHeadSign).replaceAll(PARSE_AM_PM_KEEP_ONLY_REPLACEMENT);
+		directionHeadSign = super.cleanDirectionHeadsign(fromStopName, directionHeadSign);
+		return directionHeadSign;
 	}
 
 	private static final String EXCH = "Exch";
@@ -273,6 +182,7 @@ public class CampbellRiverTransitSystemBusAgencyTools extends DefaultAgencyTools
 	@NotNull
 	@Override
 	public String cleanTripHeadsign(@NotNull String tripHeadsign) {
+		tripHeadsign = PARSE_AM_PM_.matcher(tripHeadsign).replaceAll(PARSE_AM_PM_KEEP_OTHER_REPLACEMENT);
 		tripHeadsign = EXCHANGE.matcher(tripHeadsign).replaceAll(EXCHANGE_REPLACEMENT);
 		tripHeadsign = CleanUtils.keepToAndRemoveVia(tripHeadsign);
 		tripHeadsign = ENDS_WITH_EXPRESS.matcher(tripHeadsign).replaceAll(EMPTY);
