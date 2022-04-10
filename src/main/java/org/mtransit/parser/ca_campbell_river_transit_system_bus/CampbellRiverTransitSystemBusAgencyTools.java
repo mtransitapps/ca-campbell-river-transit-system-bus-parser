@@ -4,17 +4,19 @@ import static org.mtransit.parser.StringUtils.EMPTY;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.mtransit.parser.CleanUtils;
+import org.mtransit.commons.CleanUtils;
+import org.mtransit.commons.StringUtils;
+import org.mtransit.parser.ColorUtils;
 import org.mtransit.parser.DefaultAgencyTools;
-import org.mtransit.parser.StringUtils;
-import org.mtransit.parser.gtfs.data.GAgency;
 import org.mtransit.parser.gtfs.data.GRoute;
+import org.mtransit.parser.gtfs.data.GStop;
 import org.mtransit.parser.mt.data.MAgency;
 
 import java.util.regex.Pattern;
 
 // https://www.bctransit.com/open-data
-// https://www.bctransit.com/data/gtfs/campbell-river.zip
+// OLD: https://www.bctransit.com/data/gtfs/campbell-river.zip
+// https://bct.tmix.se/Tmix.Cap.TdExport.WebApi/gtfs/?operatorIds=12
 public class CampbellRiverTransitSystemBusAgencyTools extends DefaultAgencyTools {
 
 	public static void main(@NotNull String[] args) {
@@ -32,26 +34,6 @@ public class CampbellRiverTransitSystemBusAgencyTools extends DefaultAgencyTools
 		return "Campbell River TS";
 	}
 
-	private static final String INCLUDE_AGENCY_ID = "14"; // Campbell River Transit System only
-
-	@Override
-	public boolean excludeAgency(@NotNull GAgency gAgency) {
-		//noinspection deprecation
-		if (!INCLUDE_AGENCY_ID.equals(gAgency.getAgencyId())) {
-			return EXCLUDE;
-		}
-		return super.excludeAgency(gAgency);
-	}
-
-	@Override
-	public boolean excludeRoute(@NotNull GRoute gRoute) {
-		//noinspection deprecation
-		if (gRoute.isDifferentAgency(INCLUDE_AGENCY_ID)) {
-			return EXCLUDE;
-		}
-		return super.excludeRoute(gRoute);
-	}
-
 	@NotNull
 	@Override
 	public Integer getAgencyRouteType() {
@@ -65,6 +47,11 @@ public class CampbellRiverTransitSystemBusAgencyTools extends DefaultAgencyTools
 
 	@Override
 	public boolean useRouteShortNameForRouteId() {
+		return true;
+	}
+
+	@Override
+	public boolean defaultRouteLongNameEnabled() {
 		return true;
 	}
 
@@ -95,29 +82,35 @@ public class CampbellRiverTransitSystemBusAgencyTools extends DefaultAgencyTools
 
 	@Nullable
 	@Override
-	public String getRouteColor(@NotNull GRoute gRoute, @NotNull MAgency agency) {
-		if (StringUtils.isEmpty(gRoute.getRouteColor())) {
-			final int rsn = Integer.parseInt(gRoute.getRouteShortName());
-			switch (rsn) {
-			// @formatter:off
-			case 1: return "004B8D";
-			case 2: return "8CC63F";
-			case 3: return "F37421";
-			case 4: return "49186D";
-			case 5: return "00AEEF";
-			case 6: return "008C6A";
-			case 7: return "EC1A8D";
-			case 8: return "E270AB";
-			case 12: return "B2A97E";
-			case 15: return "8D0B3A";
-			case 16: return "5D86A0";
-			case 99: return "FFC10E";
-			// @formatter:on
-			default:
-				return AGENCY_COLOR_BLUE;
-			}
+	public String fixColor(@Nullable String color) {
+		if (ColorUtils.BLACK.equals(color)) {
+			color = null;
 		}
-		return super.getRouteColor(gRoute, agency);
+		return super.fixColor(color);
+	}
+
+	@Nullable
+	@Override
+	public String provideMissingRouteColor(@NotNull GRoute gRoute) {
+		final int rsn = Integer.parseInt(gRoute.getRouteShortName());
+		switch (rsn) {
+		// @formatter:off
+		case 1: return "004B8D";
+		case 2: return "8CC63F";
+		case 3: return "F37421";
+		case 4: return "49186D";
+		case 5: return "00AEEF";
+		case 6: return "008C6A";
+		case 7: return "EC1A8D";
+		case 8: return "E270AB";
+		case 12: return "B2A97E";
+		case 15: return "8D0B3A";
+		case 16: return "5D86A0";
+		case 99: return "FFC10E";
+		// @formatter:on
+		default:
+			return AGENCY_COLOR_BLUE;
+		}
 	}
 
 	@Override
@@ -125,7 +118,12 @@ public class CampbellRiverTransitSystemBusAgencyTools extends DefaultAgencyTools
 		return true;
 	}
 
-	private static final Pattern PARSE_AM_PM_ = Pattern.compile("(^(.*)( (AM|PM) )(.*)$)");
+	@Override
+	public boolean directionSplitterEnabled() {
+		return true;
+	}
+
+	private static final Pattern PARSE_AM_PM_ = Pattern.compile("(^(.*)( (a\\.?m\\.?|p\\.?m\\.?) )(.*)$)", Pattern.CASE_INSENSITIVE);
 	private static final String PARSE_AM_PM_KEEP_ONLY_REPLACEMENT = "$4";
 	private static final String PARSE_AM_PM_KEEP_OTHER_REPLACEMENT = "$2 $5";
 
@@ -137,10 +135,6 @@ public class CampbellRiverTransitSystemBusAgencyTools extends DefaultAgencyTools
 		return directionHeadSign;
 	}
 
-	private static final String EXCH = "Exch";
-	private static final Pattern EXCHANGE = Pattern.compile("((^|\\W)(exchange)(\\W|$))", Pattern.CASE_INSENSITIVE);
-	private static final String EXCHANGE_REPLACEMENT = "$2" + EXCH + "$4";
-
 	private static final Pattern ENDS_WITH_EXPRESS = Pattern.compile("( express.*$)", Pattern.CASE_INSENSITIVE);
 
 	private static final Pattern ENDS_WITH_LOCAL = Pattern.compile("( local.*$)", Pattern.CASE_INSENSITIVE);
@@ -149,7 +143,6 @@ public class CampbellRiverTransitSystemBusAgencyTools extends DefaultAgencyTools
 	@Override
 	public String cleanTripHeadsign(@NotNull String tripHeadsign) {
 		tripHeadsign = PARSE_AM_PM_.matcher(tripHeadsign).replaceAll(PARSE_AM_PM_KEEP_OTHER_REPLACEMENT);
-		tripHeadsign = EXCHANGE.matcher(tripHeadsign).replaceAll(EXCHANGE_REPLACEMENT);
 		tripHeadsign = CleanUtils.keepToAndRemoveVia(tripHeadsign);
 		tripHeadsign = ENDS_WITH_EXPRESS.matcher(tripHeadsign).replaceAll(EMPTY);
 		tripHeadsign = ENDS_WITH_LOCAL.matcher(tripHeadsign).replaceAll(EMPTY);
@@ -165,9 +158,18 @@ public class CampbellRiverTransitSystemBusAgencyTools extends DefaultAgencyTools
 	public String cleanStopName(@NotNull String gStopName) {
 		gStopName = CleanUtils.cleanBounds(gStopName);
 		gStopName = CleanUtils.CLEAN_AT.matcher(gStopName).replaceAll(CleanUtils.CLEAN_AT_REPLACEMENT);
-		gStopName = EXCHANGE.matcher(gStopName).replaceAll(EXCHANGE_REPLACEMENT);
 		gStopName = CleanUtils.cleanStreetTypes(gStopName);
 		gStopName = CleanUtils.cleanNumbers(gStopName);
 		return CleanUtils.cleanLabel(gStopName);
+	}
+
+	@NotNull
+	@Override
+	public String getStopCode(@NotNull GStop gStop) {
+		if (StringUtils.isEmpty(gStop.getStopCode())) {
+			//noinspection deprecation
+			return gStop.getStopId(); // use stop ID as stop code (fall back = displayed on website)
+		}
+		return super.getStopCode(gStop);
 	}
 }
