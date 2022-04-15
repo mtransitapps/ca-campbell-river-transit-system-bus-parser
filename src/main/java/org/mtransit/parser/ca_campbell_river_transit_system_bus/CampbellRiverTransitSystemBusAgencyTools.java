@@ -42,12 +42,12 @@ public class CampbellRiverTransitSystemBusAgencyTools extends DefaultAgencyTools
 
 	@Override
 	public boolean defaultRouteIdEnabled() {
-		return true;
+		return false; // required for GTFS-RT
 	}
 
 	@Override
 	public boolean useRouteShortNameForRouteId() {
-		return true;
+		return false; // required for GTFS-RT
 	}
 
 	@Override
@@ -171,5 +171,10 @@ public class CampbellRiverTransitSystemBusAgencyTools extends DefaultAgencyTools
 			return gStop.getStopId(); // use stop ID as stop code (fall back = displayed on website)
 		}
 		return super.getStopCode(gStop);
+	}
+
+	@Override
+	public int getStopId(@NotNull GStop gStop) {
+		return super.getStopId(gStop); // required for GTFS-RT
 	}
 }
