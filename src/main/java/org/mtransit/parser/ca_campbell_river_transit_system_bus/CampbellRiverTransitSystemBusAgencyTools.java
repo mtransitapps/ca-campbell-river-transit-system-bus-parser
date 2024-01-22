@@ -15,8 +15,6 @@ import org.mtransit.parser.mt.data.MAgency;
 import java.util.regex.Pattern;
 
 // https://www.bctransit.com/open-data
-// OLD: https://www.bctransit.com/data/gtfs/campbell-river.zip
-// https://bct.tmix.se/Tmix.Cap.TdExport.WebApi/gtfs/?operatorIds=12
 public class CampbellRiverTransitSystemBusAgencyTools extends DefaultAgencyTools {
 
 	public static void main(@NotNull String[] args) {
@@ -41,17 +39,6 @@ public class CampbellRiverTransitSystemBusAgencyTools extends DefaultAgencyTools
 	}
 
 	@Override
-	public long getRouteId(@NotNull GRoute gRoute) {
-		return Long.parseLong(gRoute.getRouteShortName()); // used by GTFS RT
-	}
-
-	@NotNull
-	@Override
-	public String getRouteShortName(@NotNull GRoute gRoute) {
-		return gRoute.getRouteId(); // used by GTFS RT // TODO export original route ID
-	}
-
-	@Override
 	public boolean defaultRouteIdEnabled() {
 		return false; // used by GTFS RT
 	}
@@ -59,6 +46,11 @@ public class CampbellRiverTransitSystemBusAgencyTools extends DefaultAgencyTools
 	@Override
 	public boolean useRouteShortNameForRouteId() {
 		return false; // used by GTFS RT
+	}
+
+	@Override
+	public @Nullable String getRouteIdCleanupRegex() {
+		return "\\-[A-Z]+$";
 	}
 
 	@Override
